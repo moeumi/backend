@@ -12,7 +12,7 @@ def contents(): #all-contents
     ).fetchall()
     return jsonify(results)
 
-@bp.route('/contents/<district_name>')
+@bp.route('/contents/district/<district_name>')
 def district_contents(district_name):
     db=get_db()
     results = db.execute(
@@ -20,9 +20,9 @@ def district_contents(district_name):
         "FROM contents INNER JOIN center"
         "ON contents.center_name=center.center_name and center.district_name = (?)",(district_name),
     ).fetchall()
-    return jsonify(results)
+    return district_name
 
-@bp.route('/contents/<category_name>')
+@bp.route('/contents/category/<category_name>')
 def category_contents(category):
     db=get_db()
     results = db.executor(
@@ -32,7 +32,7 @@ def category_contents(category):
     ).fetchall()
     return jsonify(results)
 
-@bp.route('/fontents/<district_name>/<category_name>')
+@bp.route('/fontents/district/<district_name>/category/<category_name>')
 def district_category_contents(district_name, category_name):
     db = get_db()
     results = db.executor(
@@ -43,7 +43,7 @@ def district_category_contents(district_name, category_name):
     ).fetchall()
     return jsonify(results)
 
-@bp.route('/contents/<center_name>')
+@bp.route('/contents/center/<center_name>')
 def center_contents(center_name):
     db = get_db()
     results = db.executor(
@@ -53,7 +53,7 @@ def center_contents(center_name):
     ).fetchall()
     return jsonify(results)
 
-@bp.route('/contents/<contents_id>')
+@bp.route('/contents/id/<contents_id>')
 def id_contents(contents_id):
     db = get_db()
     results = db.executor(
