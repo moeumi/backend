@@ -8,7 +8,7 @@ DROP TABLE IF EXISTS apply_state;
 CREATE table contents{
     center_name TEXT NOT NULL,
     contents_title TEXT NOT NULL,
-    contents_id TEXT NOT NULL PRIMARY_KEY,
+    contents_id TEXT NOT NULL PRIMARY_KEY AUTOINCREMENT,
     category TEXT,
     detail_link TEXT,
     apply_start_date TEXT, /*YYYY-MM-DD*/

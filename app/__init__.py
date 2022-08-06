@@ -10,7 +10,7 @@ def create_app():
     from app import db
     #db.init_app(app)
 
-    from app import sub
-    app.register_blueprint(sub.bp)
+    from app import api
+    app.register_blueprint(api.bp)
 
     return app
