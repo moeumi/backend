@@ -1,3 +1,5 @@
+import json
+
 from flask import Blueprint, jsonify
 from app.db import get_db
 bp = Blueprint('main', __name__, url_prefix='/')
@@ -7,10 +9,12 @@ bp = Blueprint('main', __name__, url_prefix='/')
 def contents(): #all-contents
     db=get_db()
     results = db.execute(
-        "SELECT *"
-        "FROM contents"
+        "SELECT * "
+        "FROM test_contents"
     ).fetchall()
-    return jsonify(results)
+
+    data=[result[:] for result in results]
+    return jsonify(data)
 
 @bp.route('/contents/district/<district_name>')
 def district_contents(district_name):
