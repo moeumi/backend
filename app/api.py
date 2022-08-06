@@ -62,3 +62,12 @@ def id_contents(contents_id):
         "WHERE contents.contens_id=(?)", (contents_id),
     ).fetchall()
     return jsonify(results)
+
+@bp.route('/logo')
+def logo():
+    db=get_db()
+    results=db.executor(
+        "SELECT *"
+        "FROM logo"
+    ).fetchall()
+    return jsonify(results)

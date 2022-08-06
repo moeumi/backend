@@ -52,5 +52,9 @@ CREATE table apply_state{
     apply_state TEXT PRIMARY_KEY /*접수중, 마감, 대기접수, 예정*/
 }
 
+CREATE table logo{
+    title TEXT
+    image_link TEXT
+}
 
 
