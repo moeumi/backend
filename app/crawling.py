@@ -36,18 +36,18 @@ def busan_lib_event():
         library_dict[library.string] = tmp[0]
 
     elements = list(soup.select("a.viewEduInfo"))
-    element_dict = {}
+    element_list = []
     for element in elements:
         tmp = str(element).split('class="')[1].split("\"")
         if tmp[0] == "viewEduInfo":
-            element_dict[element.string] = tmp[4]  # edu-se,data-id(edu-seq)
+            element_list.append(tmp[4])  # edu-se,data-id(edu-seq)
 
     db = get_db()
     cur = db.cursor()
 
     for row in busan_lib_event.itertuples():
-        detail_link = ('https://home.pen.go.kr/yeyak/edu/lib/selectEduInfo.do?mi=14460&eduSeq=')
-        # +element_dict[row[3]]+'&srchRsSysId='+library_dict[row[2]])
+        detail_link = ('https://home.pen.go.kr/yeyak/edu/lib/selectEduInfo.do?mi=14460&eduSeq='
+        + element_list[row[0]]+'&srchRsSysId='+library_dict[row[2]])
         cur.execute("insert into test_contents(center_name, contents_title, category, detail_link,"
                     "apply_start_date, apply_end_date, operate_start_date, operate_end_date,"
                     "edu_target,apply_target,max_apply_num,applied_num,wait_num,apply_state) values"
