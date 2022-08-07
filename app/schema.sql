@@ -5,12 +5,13 @@ DROP TABLE IF EXISTS center;
 DROP TABLE IF EXISTS category;
 DROP TABLE IF EXISTS apply_state;
 DROP TABLE IF EXISTS test_contents;
+DROP TABLE IF EXISTS logo;
 
 CREATE table test_contents
 (
     center_name        TEXT NOT NULL,
     contents_title     TEXT NOT NULL,
-    contents_id        TEXT PRIMARY_KEY,
+    contents_id        INTEGER PRIMARY KEY AUTOINCREMENT,
     category           TEXT,
     detail_link        TEXT,
     apply_start_date   TEXT, /*YYYY-MM-DD*/
@@ -32,7 +33,7 @@ CREATE table contents
 (
     center_name        TEXT NOT NULL,
     contents_title     TEXT NOT NULL,
-    contents_id        TEXT PRIMARY_KEY,
+    contents_id        INTEGER PRIMARY KEY AUTOINCREMENT,
     category           TEXT,
     detail_link        TEXT,
     apply_start_date   TEXT, /*YYYY-MM-DD*/
@@ -58,7 +59,7 @@ CREATE table city
 CREATE table district
 (
     city_name     TEXT,
-    district_name TEXT PRIMARY_KEY,
+    district_name TEXT PRIMARY KEY,
     FOREIGN KEY("city_name") REFERENCES city("city_name")
 );
 
@@ -66,19 +67,19 @@ CREATE table center
 (
     city_name     TEXT,
     district_name TEXT,
-    center_name   TEXT PRIMARY_KEY,
+    center_name   TEXT PRIMARY KEY,
     FOREIGN KEY("city_name") REFERENCES city("city_name"),
     FOREIGN KEY("district_name") REFERENCES district("district_name")
 );
 
 CREATE table category
 (
-    category TEXT PRIMARY_KEY
+    category TEXT PRIMARY KEY
 );
 
 CREATE table apply_state
 (
-    apply_state TEXT PRIMARY_KEY /*접수중, 마감, 대기접수, 예정*/
+    apply_state TEXT PRIMARY KEY /*접수중, 마감, 대기접수, 예정*/
 );
 
 CREATE table logo
