@@ -13,4 +13,5 @@ build/
 *.swp
 .ipynb_checkpoints/
 *~
+config.json
 .DS_Store

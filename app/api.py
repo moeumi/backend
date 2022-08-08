@@ -1,7 +1,9 @@
 import json
 
-from flask import request
+import os.path
+from flask import request, current_app
 from flask import Blueprint, jsonify
+from PyKakao import KakaoLocal
 from app.db import get_db
 bp = Blueprint('main', __name__, url_prefix='/')
 
@@ -37,7 +39,7 @@ def category_contents(category):
     db=get_db()
     page = int(request.args.get('page'))
     offset = (page - 1) * 10
-    results = db.executor(
+    results = db.execute(
         "SELECT * "
         "FROM contents "
         "WHERE contents.category = :ctg "
@@ -50,7 +52,7 @@ def district_category_contents(district_name, category_name):
     db = get_db()
     page = int(request.args.get('page'))
     offset = (page - 1) * 10
-    results = db.executor(
+    results = db.execute(
         "SELECT * "
         "FROM contents INNER JOIN center "
         "ON contents.center_name = center.center_name and center.district_name=:dcn "
@@ -64,7 +66,7 @@ def center_contents(center_name):
     db = get_db()
     page = int(request.args.get('page'))
     offset = (page - 1) * 10
-    results = db.executor(
+    results = db.execute(
         "SELECT * "
         "FROM contents " 
         "WHERE contents.center_name= :cn "
@@ -88,8 +90,31 @@ def id_contents(contents_id):
 @bp.route('/logo')
 def logo():
     db=get_db()
-    results=db.executor(
+    results=db.execute(
         "SELECT * "
         "FROM logo;"
     ).fetchall()
+    return json.dumps([dict(ix) for ix in results], ensure_ascii=False)
+
+@bp.route('/contents/surround')
+def surround():
+    db=get_db()
+    latitude=float(request.args.get('latitude'))
+    longitude=float(request.args.get('longitude'))
+    base_path= os.path.dirname(__file__)
+    with open(os.path.join(base_path,'../config.json')) as json_file:
+        json_data = json.load(json_file)
+        key = json_data['REST_KEY']
+    KL = KakaoLocal(key)
+    x,y = longitude, latitude
+    category_result = KL.search_category("PO3", x, y, 50)
+    center_list = db.execute(
+        "SELECT center_name "
+        "FROM center; "
+    ).fetchall()
+    center_list = [dict(ix) for ix in center_list]
+    results = []
+    for category in category_result:
+        if category.place_name.strip() in center_list.center_name:
+            results.append(category)
     return json.dumps([dict(ix) for ix in results], ensure_ascii=False)
