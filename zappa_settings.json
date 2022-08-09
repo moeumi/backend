@@ -1,0 +1,10 @@
+{
+    "dev": {
+        "app_function": "run.app",
+        "profile_name": null,
+        "project_name": "backend",
+        "runtime": "python3.8",
+        "s3_bucket": "moeumi",
+        "aws_region": "ap-northeast-2"
+    }
+}

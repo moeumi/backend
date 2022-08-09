@@ -12,8 +12,15 @@ def busan_lib_event():
     db = get_db()
     base_path = os.path.dirname(__file__)
     category_df = pd.read_csv(os.path.join(base_path,'../data/category.csv'))
-    for i in range(1,5):
-        busan_lib_event_url = "https://home.pen.go.kr/yeyak/edu/lib/selectEduList.do?mi=14556&eduSeq=&srchRsSysId=&srchEduCtgry=&currPage="+str(i)+"&srchRsvSttus=&srchPeriodDiv=rcept&srchRsvBgnde=&srchRsvEndde=&srchRsvValue=&pageIndex=50"
+
+    cur = db.cursor()
+    last_update = cur.execute("select contents_title from test_contents where detail_link like '%home.pen%' order by rowid desc limit 1;").fetchall()
+
+    update_flag = True
+    page_num = 0
+    while(update_flag==True):
+        page_num+=1
+        busan_lib_event_url = "https://home.pen.go.kr/yeyak/edu/lib/selectEduList.do?mi=14556&eduSeq=&srchRsSysId=&srchEduCtgry=&currPage="+str(page_num)+"&srchRsvSttus=&srchPeriodDiv=rcept&srchRsvBgnde=&srchRsvEndde=&srchRsvValue=&pageIndex=50"
         busan_lib_event = pd.read_html(busan_lib_event_url)
         busan_lib_event = busan_lib_event[0]
         for classify in busan_lib_event:
@@ -25,6 +32,7 @@ def busan_lib_event():
                 busan_lib_event[classify] = busan_lib_event[classify].str.split("  ", 1).str[1:].str[0]
             if classify == "모집인원":
                 busan_lib_event[classify] = busan_lib_event[classify].str.split("  ", 2).str[2]
+
 
         request = requests.get(busan_lib_event_url)
         soup = bs(request.content, "html.parser")
@@ -45,11 +53,24 @@ def busan_lib_event():
                 element_list.append(tmp[4])  # edu-se,data-id(edu-seq)
                 element_str_list.append(element.string)
 
-
-        cur = db.cursor()
+        busan_lib_event_update = []
+        tmp = 0
+        for i in busan_lib_event.itertuples():
+            print(i[3], last_update[0]['contents_title'], i[3] == str(last_update[0]['contents_title']))
+            if element_str_list[i[0]] == str(last_update[0]['contents_title']):
+                update_flag = False
+                tmp = i[0]
+                busan_lib_event = busan_lib_event[busan_lib_event.index < tmp]
+                break
+            else:
+                busan_lib_event_update.append(i)
+        print(busan_lib_event)
+        return 0
+        if len(busan_lib_event_update) == 0:
+            return "there's no updated item"
 
         for row in busan_lib_event.itertuples():
-            tmp_row = row[0]
+            tmp_row=row[0]
             detail_link = ('https://home.pen.go.kr/yeyak/edu/lib/selectEduInfo.do?mi=14460&eduSeq='
             + element_list[tmp_row]+'&srchRsSysId='+library_dict[row[2]])
             category='none'
@@ -57,7 +78,6 @@ def busan_lib_event():
 
             if (tmp.empty == False):
                 category=tmp.iloc[0]['분류']
-
             cur.execute("insert or ignore into test_contents (placement_name,center_name, contents_title, category, detail_link,"
                         "apply_start_date, apply_end_date, operate_start_date, operate_end_date,"
                         "edu_target,apply_target,max_apply_num,applied_num,wait_num,apply_state) values"
@@ -71,7 +91,7 @@ def busan_lib_event():
                         )
             cur.execute("insert or ignore into test_placement(placement_name, center_name) values (?,?)",
                         (row[2], row[2]))
-            db.commit()
+        db.commit()
 
     return "finish initialize busan lib event"
 
@@ -82,12 +102,36 @@ def busan_event():
     busan_event = pd.read_html(busan_event_url)
     busan_event = busan_event[0]
     db = get_db()
-    for i in range(1,5):
+
+    cur = db.cursor()
+    last_update = cur.execute("select contents_title from test_contents where detail_link like '%reserve.busan%' order by rowid desc limit 1;").fetchall()
+
+    update_flag = True
+    page_num = 0
+    while (update_flag==True):
+        page_num+=1
         request_2 = requests.get(
-            "https://reserve.busan.go.kr/lctre/list?curPage="+str(i)+"&resveGroupSn=&progrmSn=&srchGugun=&srchResveInsttCd=&srchCtgry=&srchBeginDe=&srchEndDe=&srchVal=&srchList=N"
+            "https://reserve.busan.go.kr/lctre/list?curPage="+str(page_num)+"&resveGroupSn=&progrmSn=&srchGugun=&srchResveInsttCd=&srchCtgry=&srchBeginDe=&srchEndDe=&srchVal=&srchList=N"
             )
         soup_2 = bs(request_2.content, "html.parser")
 
+        titles = soup_2.select("div.infoBox>p")
+        title_list = []
+        for title in titles:
+            title_list.append(title.string)
+
+        busan_event_update = []
+        for i in title_list:
+            if i == last_update[0]['contents_title']:
+                update_flag = False
+                title_list = title_list[:title_list.index(i)]
+                break
+            else:
+                busan_event_update.append(i)
+        if len(busan_event_update)==0:
+            return "there's no updated item"
+        print(title_list)
+        return 0
         ids = soup_2.select('a.reserveItem')
         ids_list = []
         for id_ in ids:
@@ -95,10 +139,7 @@ def busan_event():
             tmp_prg = str(id_).split("fn_viewProgrm('")[1].split("')")[0].split(", '")[1]
             ids_list.append({'group': tmp_group, 'prg': tmp_prg})
 
-        titles = soup_2.select("div.infoBox>p")
-        title_list = []
-        for title in titles:
-            title_list.append(title.string)
+
 
         statuses = soup_2.select("div.infoBox>span.statusMark")
         status_list = []
@@ -115,6 +156,7 @@ def busan_event():
 
         infos = soup_2.select("dd")
         info_list = []
+
         for info in infos:
             tmp = str(info).split('\t')[-1].split('</dd>')[0]
             if tmp[0] != '<':
@@ -123,12 +165,8 @@ def busan_event():
         info_dict = [{'기관': info_list[i], '대상': info_list[i + 1], '장소': info_list[i + 2], '문의': info_list[i + 3]} for i
                      in range(0, len(info_list), 4)]
 
-
-
-        cur = db.cursor()
-
-        for j in range(10):
-            tmp_row=j+(10*i)
+        for j in range(len(title_list)):
+            tmp_row=j+(10*page_num)
             category = 'none'
             tmp = category_df.query('강좌명.str.contains("@title_list[j]")')
             if (tmp.empty == False):
@@ -148,6 +186,7 @@ def busan_event():
                         )
             cur.execute("insert or ignore into test_placement(placement_name, center_name) values (?,?)",
                         (info_dict[j]['장소'],info_dict[j]['기관']))
-            db.commit()
+        db.commit()
+    db.close()
 
     return "finish"

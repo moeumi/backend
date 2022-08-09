@@ -1,9 +1,10 @@
 import os
 
-from flask import Flask, current_app
+from flask import Flask
 
 
-def create_app():
+
+def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config['JSON_AS_ASCII'] = False
     app.config.from_mapping(
@@ -35,9 +36,19 @@ def create_app():
     from app import category
     from app import center
     from app import crawling
-    with app.app_context():
-        category.category()
-        center.center()
-        crawling.busan_lib_event()
-        crawling.busan_event()
+    from app import crawling_update
+
+    #with app.app_context():
+    #    category.category()
+    #    center.center()
+    #    crawling.busan_lib_event()
+    #    crawling.busan_event()
+        #crawling_update.busan_lib_event()
+        #crawling_update.busan_event()
+
+    app.add_url_rule("/", endpoint="index")
+
     return app
+
+if __name__ == '__main__':
+    app.run()
