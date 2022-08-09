@@ -11,3 +11,8 @@
 
 ### run
     flask run
+
+### tech_stack
+- backend: flask
+- db: sqlite
+- server deploy: AWS lambda, AWS api gateway, AWS S3 by using ZAPPA

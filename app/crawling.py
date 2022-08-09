@@ -11,7 +11,7 @@ from flask import Blueprint, jsonify
 def busan_lib_event():
     db = get_db()
     base_path = os.path.dirname(__file__)
-    category_df = pd.read_csv(os.path.join(base_path,'../data/category.csv'))
+    category_df = pd.read_excel(os.path.join(base_path,'../data/contents.xlsx'))
     for i in range(1,5):
         busan_lib_event_url = "https://home.pen.go.kr/yeyak/edu/lib/selectEduList.do?mi=14556&eduSeq=&srchRsSysId=&srchEduCtgry=&currPage="+str(i)+"&srchRsvSttus=&srchPeriodDiv=rcept&srchRsvBgnde=&srchRsvEndde=&srchRsvValue=&pageIndex=50"
         busan_lib_event = pd.read_html(busan_lib_event_url)
@@ -53,7 +53,7 @@ def busan_lib_event():
             detail_link = ('https://home.pen.go.kr/yeyak/edu/lib/selectEduInfo.do?mi=14460&eduSeq='
             + element_list[tmp_row]+'&srchRsSysId='+library_dict[row[2]])
             category='none'
-            tmp = category_df.query('강좌명.str.contains("@element_str_list[tmp_row]")')
+            tmp = category_df.loc[category_df['강좌명'] == element_str_list[tmp_row]]
 
             if (tmp.empty == False):
                 category=tmp.iloc[0]['분류']
@@ -77,7 +77,7 @@ def busan_lib_event():
 
 def busan_event():
     base_path = os.path.dirname(__file__)
-    category_df = pd.read_csv(os.path.join(base_path, '../data/category.csv'))
+    category_df = pd.read_excel(os.path.join(base_path,'../data/contents.xlsx'))
     busan_event_url = "https://reserve.busan.go.kr/lctre/list?resveGroupSn=&progrmSn=&srchGugun=&srchResveInsttCd=&srchCtgry=&srchBeginDe=&srchEndDe=&srchVal=&srchList=Y"
     busan_event = pd.read_html(busan_event_url)
     busan_event = busan_event[0]
@@ -130,7 +130,8 @@ def busan_event():
         for j in range(10):
             tmp_row=j+(10*i)
             category = 'none'
-            tmp = category_df.query('강좌명.str.contains("@title_list[j]")')
+            query_str=f'강좌명.str.match(\"{title_list[j]}\")'
+            tmp = category_df.loc[category_df['강좌명'] ==title_list[j]]
             if (tmp.empty == False):
                 category = tmp.iloc[0]['분류']
             detail_link = ('https://reserve.busan.go.kr/lctre/view?resveGroupSn='

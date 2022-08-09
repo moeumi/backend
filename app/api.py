@@ -99,6 +99,7 @@ def logo():
 @bp.route('/contents/surround')
 def surround():
     db=get_db()
+    page = int(request.args.get('page'))
     latitude=float(request.args.get('latitude'))
     longitude=float(request.args.get('longitude'))
     base_path= os.path.dirname(__file__)
@@ -107,16 +108,25 @@ def surround():
         key = json_data['REST_KEY']
     KL = KakaoLocal(key)
     x,y = longitude, latitude
-    category_result = KL.search_category("PO3", x, y, 50)['documents']
-    print(category_result)
-    center_list = db.execute(
-        "SELECT center_name "
-        "FROM test_center; "
+    placement_list = db.execute(
+        "SELECT placement_name "
+        "FROM test_placement; "
     ).fetchall()
-    center_list = [ix['center_name'] for ix in center_list]
-    results = []
-    print(center_list)
-    for category in category_result:
-        if category['place_name'].strip() in center_list:
-            results.append(category)
-    return json.dumps([dict(ix) for ix in results], ensure_ascii=False)
+    placement_list = [ix['placement_name'] for ix in placement_list]
+    results=[]
+    for i in placement_list:
+        tmp=KL.search_keyword(query=i,x=x,y=y,radius=15)
+        if tmp['meta']['pageable_count']!=0:
+            results.append(i)
+    surround_result=[]
+    for i in results:
+        tmp_list = db.execute(
+            "SELECT * "
+            "FROM test_contents "
+            "WHERE placement_name=:ct",{'ct':i},
+        ).fetchall()
+        surround_result+=[dict(ix) for ix in tmp_list]
+    if 10*page<len(surround_result):
+        return json.dumps(surround_result[10*(page-1):10*(page)], ensure_ascii=False)
+    else:
+        return json.dumps(surround_result[10*(page):], ensure_ascii=False)

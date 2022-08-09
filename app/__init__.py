@@ -39,16 +39,13 @@ def create_app(test_config=None):
     from app import crawling_update
 
     #with app.app_context():
-    #    category.category()
-    #    center.center()
-    #    crawling.busan_lib_event()
-    #    crawling.busan_event()
+        #category.category()
+        #center.center()
+        #crawling.busan_lib_event()
+        #crawling.busan_event()
         #crawling_update.busan_lib_event()
         #crawling_update.busan_event()
 
     app.add_url_rule("/", endpoint="index")
 
     return app
-
-if __name__ == '__main__':
-    app.run()
