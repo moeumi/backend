@@ -13,6 +13,7 @@ def create_app():
         DATABASE=os.path.join(app.instance_path, "app.sqlite"),
     )
 
+
     try:
         os.makedirs(app.instance_path)
     except OSError:
@@ -31,8 +32,12 @@ def create_app():
     from app import api
     app.register_blueprint(api.bp)
 
+    from app import category
+    from app import center
     from app import crawling
-    app.register_blueprint(crawling.bp)
-    #busan_lib_event()
-
+    with app.app_context():
+        category.category()
+        center.center()
+        crawling.busan_lib_event()
+        crawling.busan_event()
     return app

@@ -1,17 +1,17 @@
 import json
 
 import pandas as pd
+import os.path
 from app.db import get_db
 import requests
 from bs4 import BeautifulSoup as bs
 from flask import Blueprint, jsonify
 
-bp = Blueprint("app", __name__)
 
-
-@bp.route("/testdb/busan_lib_event")
 def busan_lib_event():
     db = get_db()
+    base_path = os.path.dirname(__file__)
+    category_df = pd.read_csv(os.path.join(base_path,'../data/category.csv'))
     for i in range(1,5):
         busan_lib_event_url = "https://home.pen.go.kr/yeyak/edu/lib/selectEduList.do?mi=14556&eduSeq=&srchRsSysId=&srchEduCtgry=&currPage="+str(i)+"&srchRsvSttus=&srchPeriodDiv=rcept&srchRsvBgnde=&srchRsvEndde=&srchRsvValue=&pageIndex=50"
         busan_lib_event = pd.read_html(busan_lib_event_url)
@@ -52,10 +52,15 @@ def busan_lib_event():
             tmp_row = row[0]
             detail_link = ('https://home.pen.go.kr/yeyak/edu/lib/selectEduInfo.do?mi=14460&eduSeq='
             + element_list[tmp_row]+'&srchRsSysId='+library_dict[row[2]])
-            cur.execute("insert or ignore into test_contents (center_name, contents_title, category, detail_link,"
+            category='none'
+            tmp = category_df.query('강좌명.str.contains("@element_str_list[tmp_row]")')
+
+            if (tmp.empty == False):
+                category=tmp.iloc[0]['분류']
+            cur.execute("insert or ignore into test_contents (placement_name,center_name, contents_title, category, detail_link,"
                         "apply_start_date, apply_end_date, operate_start_date, operate_end_date,"
                         "edu_target,apply_target,max_apply_num,applied_num,wait_num,apply_state) values"
-                        "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (row[2], element_str_list[tmp_row], 'none', detail_link,
+                        "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (row[2],row[2], element_str_list[tmp_row], category, detail_link,
                                                           row[4].split(" ~")[0], row[4].split(" ~")[1],
                                                           row[5].split(" ~")[0], row[5].split(" ~")[1],
                                                           row[6], row[7],
@@ -63,13 +68,15 @@ def busan_lib_event():
                                                           int(row[8].split("/")[1].split(":")[1].split("명")[0]),
                                                           0, row[9])
                         )
+            cur.execute("insert or ignore into test_placement(placement_name, center_name) values (?,?)",
+                        (row[2], row[2]))
         db.commit()
-    db.close()
 
     return "finish initialize busan lib event"
 
-@bp.route("/testdb/busan_event")
 def busan_event():
+    base_path = os.path.dirname(__file__)
+    category_df = pd.read_csv(os.path.join(base_path, '../data/category.csv'))
     busan_event_url = "https://reserve.busan.go.kr/lctre/list?resveGroupSn=&progrmSn=&srchGugun=&srchResveInsttCd=&srchCtgry=&srchBeginDe=&srchEndDe=&srchVal=&srchList=Y"
     busan_event = pd.read_html(busan_event_url)
     busan_event = busan_event[0]
@@ -121,12 +128,16 @@ def busan_event():
 
         for j in range(10):
             tmp_row=j+(10*i)
+            category = 'none'
+            tmp = category_df.query('강좌명.str.contains("@title_list[j]")')
+            if (tmp.empty == False):
+                category = tmp.iloc[0]['분류']
             detail_link = ('https://reserve.busan.go.kr/lctre/view?resveGroupSn='
             + ids_list[j]['group']+'&progrmSn='+ids_list[j]['prg']+'&srchGugun=&srchResveInsttCd=&srchCtgry=&srchBeginDe=&srchEndDe=&srchVal=')
-            cur.execute("insert or ignore into test_contents (center_name, contents_title, category, detail_link,"
+            cur.execute("insert or ignore into test_contents (placement_name, center_name, contents_title, category, detail_link,"
                         "apply_start_date, apply_end_date, operate_start_date, operate_end_date,"
                         "edu_target,apply_target,max_apply_num,applied_num,wait_num,apply_state) values"
-                        "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (info_dict[j]['기관'], title_list[j], 'none', detail_link,
+                        "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (info_dict[j]['장소'],info_dict[j]['기관'], title_list[j], category, detail_link,
                                                           date_dict[j]['신청'].split(" ~")[0], date_dict[j]['신청'].split(" ~")[1],
                                                           date_dict[j]['행사'].split(" ~")[0], date_dict[j]['행사'].split(" ~")[1],
                                                           info_dict[j]['대상'], 'none',
@@ -134,7 +145,13 @@ def busan_event():
                                                           int(busan_event.loc[tmp_row]['정원/접수/잔여'].split("/")[1].strip()),
                                                           0, status_list[j])
                         )
+            cur.execute("insert or ignore into test_placement(placement_name, center_name) values (?,?)",
+                        (info_dict[j]['장소'],info_dict[j]['기관']))
         db.commit()
     db.close()
 
     return "finish"
+
+if __name__=="__main___":
+    busan_lib_event()
+    busan_event()

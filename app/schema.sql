@@ -5,11 +5,15 @@ DROP TABLE IF EXISTS center;
 DROP TABLE IF EXISTS category;
 DROP TABLE IF EXISTS apply_state;
 DROP TABLE IF EXISTS test_contents;
+DROP TABLE IF EXISTS test_center;
+DROP TABLE IF EXISTS test_placement;
+DROP TABLE IF EXISTS test_category;
 DROP TABLE IF EXISTS logo;
 
 CREATE table test_contents
 (
     center_name        TEXT NOT NULL,
+    placement_name     TEXT,
     contents_title     TEXT NOT NULL,
     contents_id        INTEGER PRIMARY KEY AUTOINCREMENT,
     category           TEXT,
@@ -24,6 +28,7 @@ CREATE table test_contents
     applied_num        INTEGER,
     wait_num           INTEGER,
     apply_state        TEXT,
+    FOREIGN KEY ("placement_name") REFERENCES placement("placement_name"),
     FOREIGN KEY ("category") REFERENCES category("category"),
     FOREIGN KEY ("center_name") REFERENCES center("center_name"),
     FOREIGN KEY ("apply_state") REFERENCES apply_state("apply_state")
@@ -32,6 +37,7 @@ CREATE table test_contents
 CREATE table contents
 (
     center_name        TEXT NOT NULL,
+    placement_name     TEXT,
     contents_title     TEXT NOT NULL,
     contents_id        INTEGER PRIMARY KEY AUTOINCREMENT,
     category           TEXT,
@@ -63,11 +69,23 @@ CREATE table district
     district_name TEXT PRIMARY KEY,
     FOREIGN KEY("city_name") REFERENCES city("city_name")
 );
-INSERT OR IGNORE INTO district VALUES(('부산광역시','중구'),('부산광역시','서구'),
-    ('부산광역시','동구'),('부산광역시','영도구'),('부산광역시','부산진구'),('부산광역시','동래구'),
-    ('부산광역시','남구'),('부산광역시','북구'),('부산광역시','해운대구'),('부산광역시','사하구'),
-    ('부산광역시','금정구'),('부산광역시','강서구'),('부산광역시','연제구'),('부산광역시','수영구'),
-    ('부산광역시','사상구'),('부산광역시','기장군'));
+
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','중구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','서구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','동구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','영도구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','부산진구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','동래구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','남구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','북구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','해운대구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','사하구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','금정구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','강서구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','연제구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','수영구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','사상구');
+INSERT OR IGNORE INTO district(city_name, district_name) VALUES ('부산광역시','기장군');
 
 CREATE table center
 (
@@ -78,11 +96,29 @@ CREATE table center
     FOREIGN KEY("district_name") REFERENCES district("district_name")
 );
 
+CREATE table test_center
+(
+    city_name     TEXT,
+    district_name TEXT,
+    center_name   TEXT PRIMARY KEY,
+    FOREIGN KEY("city_name") REFERENCES city("city_name"),
+    FOREIGN KEY("district_name") REFERENCES district("district_name")
+);
 
-CREATE table category
+CREATE table test_placement
+(
+    center_name   TEXT,
+    placement_name TEXT PRIMARY KEY,
+    FOREIGN KEY("center_name") REFERENCES test_center("center_name")
+);
+
+
+CREATE table test_category
 (
     category TEXT PRIMARY KEY
 );
+
+
 /*INSERT INTO category values();*/
 
 CREATE table apply_state
@@ -90,7 +126,12 @@ CREATE table apply_state
     apply_state TEXT PRIMARY KEY /*접수중, 마감, 대기접수, 예정*/
 );
 
-INSERT OR IGNORE INTO apply_state VALUES (('접수중'),('마감'),('대기접수'),('예정'),('대기중'),('접수마감') );
+INSERT OR IGNORE INTO apply_state VALUES ('접수중');
+INSERT OR IGNORE INTO apply_state VALUES ('마감');
+INSERT OR IGNORE INTO apply_state VALUES ('대기접수');
+INSERT OR IGNORE INTO apply_state VALUES ('예정');
+INSERT OR IGNORE INTO apply_state VALUES ('대기중');
+INSERT OR IGNORE INTO apply_state VALUES ('접수마감');
 
 CREATE table logo
 (

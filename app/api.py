@@ -28,35 +28,35 @@ def district_contents(district_name):
     offset = (page - 1) * 10
     results = db.execute(
         "SELECT * "
-        "FROM contents INNER JOIN center "
-        "ON contents.center_name=center.center_name and center.district_name = :dcn "
+        "FROM test_contents INNER JOIN test_center "
+        "ON test_contents.center_name=test_center.center_name and test_center.district_name = :dcn "
         "LIMIT 10 OFFSET :num;", {"dcn": district_name, "num":offset},
     ).fetchall()
     return json.dumps([dict(ix) for ix in results], ensure_ascii=False)
 
 @bp.route('/contents/category/<category_name>')
-def category_contents(category):
+def category_contents(category_name):
     db=get_db()
     page = int(request.args.get('page'))
     offset = (page - 1) * 10
     results = db.execute(
         "SELECT * "
-        "FROM contents "
-        "WHERE contents.category = :ctg "
-        "LIMIT 10 OFFSET :num", {"ctg":category, "num":offset},
+        "FROM test_contents "
+        "WHERE test_contents.category = :ctg "
+        "LIMIT 10 OFFSET :num", {"ctg":category_name, "num":offset},
     ).fetchall()
     return json.dumps([dict(ix) for ix in results], ensure_ascii=False)
 
-@bp.route('/fontents/district/<district_name>/category/<category_name>')
+@bp.route('/contents/district/<district_name>/category/<category_name>')
 def district_category_contents(district_name, category_name):
     db = get_db()
     page = int(request.args.get('page'))
     offset = (page - 1) * 10
     results = db.execute(
         "SELECT * "
-        "FROM contents INNER JOIN center "
-        "ON contents.center_name = center.center_name and center.district_name=:dcn "
-        "WHERE contents.category=:ctg "
+        "FROM test_contents INNER JOIN test_center "
+        "ON test_contents.center_name = test_center.center_name and test_center.district_name=:dcn "
+        "WHERE test_contents.category=:ctg "
         "LIMIT 10 OFFSET :num",{"dcn":district_name, "ctg":category_name, "num":offset}
     ).fetchall()
     return json.dumps([dict(ix) for ix in results], ensure_ascii=False)
@@ -68,8 +68,8 @@ def center_contents(center_name):
     offset = (page - 1) * 10
     results = db.execute(
         "SELECT * "
-        "FROM contents " 
-        "WHERE contents.center_name= :cn "
+        "FROM test_contents " 
+        "WHERE test_contents.center_name= :cn "
         "LIMIT 10 OFFSET :num;", {"cn":center_name, "num":offset},
     ).fetchall()
     return json.dumps([dict(ix) for ix in results], ensure_ascii=False)
@@ -82,7 +82,7 @@ def id_contents(contents_id):
     results = db.execute(
         "SELECT * "
         "FROM test_contents "
-        "WHERE test_contents.contents_id> :cid "
+        "WHERE test_contents.contents_id= :cid "
         "LIMIT 10 OFFSET :num;", {'cid':contents_id, 'num':offset},
     ).fetchall()
     return json.dumps([dict(ix) for ix in results], ensure_ascii=False)
@@ -107,14 +107,16 @@ def surround():
         key = json_data['REST_KEY']
     KL = KakaoLocal(key)
     x,y = longitude, latitude
-    category_result = KL.search_category("PO3", x, y, 50)
+    category_result = KL.search_category("PO3", x, y, 50)['documents']
+    print(category_result)
     center_list = db.execute(
         "SELECT center_name "
-        "FROM center; "
+        "FROM test_center; "
     ).fetchall()
-    center_list = [dict(ix) for ix in center_list]
+    center_list = [ix['center_name'] for ix in center_list]
     results = []
+    print(center_list)
     for category in category_result:
-        if category.place_name.strip() in center_list.center_name:
+        if category['place_name'].strip() in center_list:
             results.append(category)
     return json.dumps([dict(ix) for ix in results], ensure_ascii=False)
