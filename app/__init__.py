@@ -7,6 +7,7 @@ from flask import Flask
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config['JSON_AS_ASCII'] = False
+    app.config['JSONIFY_PRETTYPRINT_REGULAR']=True
     app.config.from_mapping(
         # a default secret that should be overridden by instance config
         SECRET_KEY="dev",
@@ -43,8 +44,6 @@ def create_app(test_config=None):
         #center.center()
         #crawling.busan_lib_event()
         #crawling.busan_event()
-        #crawling_update.busan_lib_event()
-        #crawling_update.busan_event()
 
     app.add_url_rule("/", endpoint="index")
 

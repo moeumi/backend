@@ -58,10 +58,10 @@ def busan_lib_event():
             if (tmp.empty == False):
                 category=tmp.iloc[0]['분류']
 
-            cur.execute("insert or ignore into test_contents (placement_name,center_name, contents_title, category, detail_link,"
+            cur.execute("INSERT OR IGNORE INTO test_contents (placement_name,center_name, contents_title, contents_id,category, detail_link,"
                         "apply_start_date, apply_end_date, operate_start_date, operate_end_date,"
-                        "edu_target,apply_target,max_apply_num,applied_num,wait_num,apply_state) values"
-                        "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (row[2],row[2], element_str_list[tmp_row], category, detail_link,
+                        "edu_target,apply_target,max_apply_num,applied_num,wait_num,apply_state) VALUES"
+                        "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (row[2],row[2], element_str_list[tmp_row], row[1], category, detail_link,
                                                           row[4].split(" ~")[0], row[4].split(" ~")[1],
                                                           row[5].split(" ~")[0], row[5].split(" ~")[1],
                                                           row[6], row[7],
@@ -69,7 +69,7 @@ def busan_lib_event():
                                                           int(row[8].split("/")[1].split(":")[1].split("명")[0]),
                                                           0, row[9])
                         )
-            cur.execute("insert or ignore into test_placement(placement_name, center_name) values (?,?)",
+            cur.execute("INSERT OR IGNORE INTO test_placement(placement_name, center_name) VALUES (?,?)",
                         (row[2], row[2]))
             db.commit()
 
@@ -130,16 +130,15 @@ def busan_event():
         for j in range(10):
             tmp_row=j+(10*i)
             category = 'none'
-            query_str=f'강좌명.str.match(\"{title_list[j]}\")'
             tmp = category_df.loc[category_df['강좌명'] ==title_list[j]]
             if (tmp.empty == False):
                 category = tmp.iloc[0]['분류']
             detail_link = ('https://reserve.busan.go.kr/lctre/view?resveGroupSn='
             + ids_list[j]['group']+'&progrmSn='+ids_list[j]['prg']+'&srchGugun=&srchResveInsttCd=&srchCtgry=&srchBeginDe=&srchEndDe=&srchVal=')
-            cur.execute("insert or ignore into test_contents (placement_name, center_name, contents_title, category, detail_link,"
+            cur.execute("INSERT OR IGNORE INTO test_contents (placement_name, center_name, contents_title, contents_id,category, detail_link,"
                         "apply_start_date, apply_end_date, operate_start_date, operate_end_date,"
-                        "edu_target,apply_target,max_apply_num,applied_num,wait_num,apply_state) values"
-                        "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (info_dict[j]['장소'],info_dict[j]['기관'], title_list[j], category, detail_link,
+                        "edu_target,apply_target,max_apply_num,applied_num,wait_num,apply_state) VALUES"
+                        "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (info_dict[j]['장소'],info_dict[j]['기관'], title_list[j], int(busan_event.loc[tmp_row]['순번']),category, detail_link,
                                                           date_dict[j]['신청'].split(" ~")[0], date_dict[j]['신청'].split(" ~")[1],
                                                           date_dict[j]['행사'].split(" ~")[0], date_dict[j]['행사'].split(" ~")[1],
                                                           info_dict[j]['대상'], 'none',
@@ -147,7 +146,7 @@ def busan_event():
                                                           int(busan_event.loc[tmp_row]['정원/접수/잔여'].split("/")[1].strip()),
                                                           0, status_list[j])
                         )
-            cur.execute("insert or ignore into test_placement(placement_name, center_name) values (?,?)",
+            cur.execute("INSERT OR IGNORE INTO test_placement(placement_name, center_name) VALUES (?,?)",
                         (info_dict[j]['장소'],info_dict[j]['기관']))
             db.commit()
 

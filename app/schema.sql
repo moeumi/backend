@@ -15,7 +15,7 @@ CREATE table test_contents
     center_name        TEXT NOT NULL,
     placement_name     TEXT,
     contents_title     TEXT NOT NULL,
-    contents_id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    contents_id        INTEGER,
     category           TEXT,
     detail_link        TEXT,
     apply_start_date   TEXT, /*YYYY-MM-DD*/
@@ -28,6 +28,7 @@ CREATE table test_contents
     applied_num        INTEGER,
     wait_num           INTEGER,
     apply_state        TEXT,
+    CONSTRAINT contents_pk PRIMARY KEY (center_name, contents_id, contents_title),
     FOREIGN KEY ("placement_name") REFERENCES placement("placement_name"),
     FOREIGN KEY ("category") REFERENCES category("category"),
     FOREIGN KEY ("center_name") REFERENCES center("center_name"),
