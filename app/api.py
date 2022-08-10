@@ -1,11 +1,39 @@
 import json
 
 import os.path
-from flask import request, current_app, Response
+from flask import request, current_app, Response, redirect, url_for
 from flask import Blueprint, jsonify
 from PyKakao import KakaoLocal
 from app.db import get_db
 bp = Blueprint('main', __name__, url_prefix='/')
+
+@bp.route('/recommends', methods=["POST"])
+def recommends():
+    print(request.get_json())
+    db=get_db()
+    data=request.get_json()
+    token = data["token"]
+    category = data["category"]
+    sex = data["sex"]
+    age = data["age"]
+
+    print(token, list(category), sex, age)
+    db.execute(
+        "INSERT INTO user (token, sex, age) "
+        "values (?,?,?);", (token, sex, age),
+    )
+
+    for i in category:
+        db.execute(
+            "INSERT INTO test_user_category (token, category)"
+            "values (?,?);", (token, i)
+        )
+
+    db.commit()
+
+    return Response("success")
+
+
 
 
 @bp.route('/contents')
@@ -60,8 +88,8 @@ def district_category_contents(district_name, category_name):
         "SELECT * "
         "FROM test_contents INNER JOIN test_center "
         "ON test_contents.center_name = test_center.center_name and test_center.district_name=:dcn "
-        "ORDER BY test_contents.contents_id DESC  "
         "WHERE test_contents.category=:ctg "
+        "ORDER BY test_contents.contents_id DESC  "
         "LIMIT 10 OFFSET :num",{"dcn":district_name, "ctg":category_name, "num":offset}
     ).fetchall()
     return json.dumps([dict(ix) for ix in results], ensure_ascii=False)

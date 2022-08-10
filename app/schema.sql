@@ -139,4 +139,35 @@ CREATE table logo
     image_link TEXT
 );
 
+CREATE TABLE sex(
+    sex TEXT PRIMARY KEY
+);
+insert or ignore into sex(sex) values("여성");
+insert or ignore into sex(sex) values("남성");
+insert or ignore into sex(sex) values("선택안함");
+
+CREATE TABLE age(
+    age TEXT PRIMARY KEY
+);
+insert or ignore into age(age) values("10");
+insert or ignore into age(age) values("20");
+insert or ignore into age(age) values("30");
+insert or ignore into age(age) values("40");
+insert or ignore into age(age) values("50+");
+
+CREATE TABLE user(
+    token TEXT PRIMARY KEY,
+    sex TEXT,
+    age TEXT,
+    FOREIGN KEY ("sex") REFERENCES sex("sex"),
+    FOREIGN KEY ("age") REFERENCES age("age"),
+);
+
+CREATE TABLE test_user_category(
+    token   TEXT,
+    category    TEXT,
+    CONSTRAINT category_user_pk PRIMARY KEY (token, category),
+    FOREIGN KEY ("token") REFERENCES user("token"),
+);
+
 
