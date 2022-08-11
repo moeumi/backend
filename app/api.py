@@ -1,6 +1,7 @@
 import json
 
 import os.path
+import requests
 from flask import request, current_app, Response, redirect, url_for
 from flask import Blueprint, jsonify
 from PyKakao import KakaoLocal
@@ -175,3 +176,19 @@ def surround():
         return json.dumps(surround_result[10 * (page - 1):10 * (page)], ensure_ascii=False)
     else:
         return json.dumps(surround_result[10 * (page):], ensure_ascii=False)
+
+
+@bp.route('/get_district<lat><long>')
+def current_district(lat, lon):
+    """
+    If the current location is in latitude and longitude, return the district name
+    """
+    base_path = os.path.dirname(__file__)
+    with open(os.path.join(base_path, '../config.json')) as json_file:
+        json_data = json.load(json_file)
+        key = json_data['REST_KEY']
+    header = {"Authorization": key}
+
+    url = f"https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x={lon}&y={lat}"
+    response = requests.get(url, headers=header)
+    return response.json()["documents"][0]['region_2depth_name']
