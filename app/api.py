@@ -72,8 +72,9 @@ def category_contents(category_name):
     offset = (page - 1) * 10
     results = db.execute(
         "SELECT * "
-        "FROM test_contents "
-        "WHERE test_contents.category = :ctg "
+        "FROM test_contents INNER JOIN test_category "
+        "ON test_contents.category = test_category.category "
+        "WHERE test_category.main_category = :ctg "
         "ORDER BY contents_id DESC "
         "LIMIT 10 OFFSET :num", {"ctg":category_name, "num":offset},
     ).fetchall()
