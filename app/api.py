@@ -87,9 +87,10 @@ def district_category_contents(district_name, category_name):
     offset = (page - 1) * 10
     results = db.execute(
         "SELECT * "
-        "FROM test_contents INNER JOIN test_center "
+        "FROM test_contents INNER JOIN test_center, test_category "
         "ON test_contents.center_name = test_center.center_name and test_center.district_name=:dcn "
-        "WHERE test_contents.category=:ctg "
+        "and test_contents.category = test_category.category "
+        "WHERE test_category.main_category=:ctg "
         "ORDER BY test_contents.contents_id DESC  "
         "LIMIT 10 OFFSET :num",{"dcn":district_name, "ctg":category_name, "num":offset}
     ).fetchall()
