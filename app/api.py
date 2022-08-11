@@ -178,17 +178,21 @@ def surround():
         return json.dumps(surround_result[10 * (page):], ensure_ascii=False)
 
 
-@bp.route('/get_district<lat><long>')
-def current_district(lat, lon):
+@bp.route('/get_district')
+def current_district():
     """
     If the current location is in latitude and longitude, return the district name
     """
     base_path = os.path.dirname(__file__)
+    latitude = float(request.args.get('latitude'))
+    longitude = float(request.args.get('longitude'))
     with open(os.path.join(base_path, '../config.json')) as json_file:
         json_data = json.load(json_file)
         key = json_data['REST_KEY']
-    header = {"Authorization": key}
+    header = {"Authorization": "KakaoAK {}".format(key)}
 
-    url = f"https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x={lon}&y={lat}"
-    response = requests.get(url, headers=header)
-    return response.json()["documents"][0]['region_2depth_name']
+    url = f"https://dapi.kakao.com/v2/local/geo/coord2regioncode.json"
+    response = requests.get(url, headers=header, params={"x":f"{longitude}", "y":f"{latitude}"})
+    document = json.loads(response.text)
+    #return response.json()["documents"][0]['region_2depth_name']
+    return document['documents'][0]['region_2depth_name']
