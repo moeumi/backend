@@ -8,8 +8,8 @@ from app.db import get_db
 from app.db import init_db
 
 # read in SQL for populating test data
-with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
-    _data_sql = f.read().decode("utf8")
+with open(os.path.join(os.path.dirname(__file__), "../instance/app.sqlite"), "rb") as f:
+    _data_sql = f.read().decode("unicode_escape")
 
 
 @pytest.fixture
@@ -22,8 +22,7 @@ def app():
 
     # create the database and load test data
     with app.app_context():
-        init_db()
-        get_db().executescript(_data_sql)
+        get_db()
 
     yield app
 

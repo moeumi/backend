@@ -115,13 +115,19 @@ def busan_event():
 
         infos = soup_2.select("dd")
         info_list = []
-        for info in infos:
-            tmp = str(info).split('\t')[-1].split('</dd>')[0]
+        info_dict=[]
+        for info in range(len(infos)):
+            tmp = str(infos[info]).split('\t')[-1].split('</dd>')[0]
             if tmp[0] != '<':
                 info_list.append(tmp.replace(u'\xa0', u''))
+                print(info_list, info)
+            if (info+1)%5==0:
+                if len(info_list)==4:
+                    info_dict.append({'기관':info_list[0], '대상':info_list[1],'장소':info_list[2], '문의':info_list[3]})
+                elif len(info_list)==3:
+                    info_dict.append({'기관':info_list[0], '대상':'', '장소':info_list[1],'문의':info_list[2]})
+                info_list = []
 
-        info_dict = [{'기관': info_list[i], '대상': info_list[i + 1], '장소': info_list[i + 2], '문의': info_list[i + 3]} for i
-                     in range(0, len(info_list), 4)]
 
 
 

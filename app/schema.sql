@@ -116,6 +116,7 @@ CREATE table test_placement
 
 CREATE table test_category
 (
+    main_category TEXT,
     category TEXT PRIMARY KEY
 );
 
