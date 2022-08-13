@@ -6,6 +6,7 @@ from flask import request, current_app, Response, redirect, url_for
 from flask import Blueprint, jsonify
 from PyKakao import KakaoLocal
 from app.db import get_db
+from haversine import haversine
 
 bp = Blueprint('main', __name__, url_prefix='/')
 
@@ -108,8 +109,9 @@ def center_contents(center_name):
     offset = (page - 1) * 10
     results = db.execute(
         "SELECT * "
-        "FROM test_contents "
-        "WHERE test_contents.center_name= :cn "
+        "FROM test_contents INNER JOIN test_placement_loc "
+        "ON test_placement_loc.placement_name = test_contents.placement_name "
+        "WHERE test_placement_loc.real_placement_name= :cn "
         "ORDER BY contents_id DESC "
         "LIMIT 10 OFFSET :num;", {"cn": center_name, "num": offset},
     ).fetchall()
@@ -147,35 +149,22 @@ def surround():
     page = int(request.args.get('page'))
     latitude = float(request.args.get('latitude'))
     longitude = float(request.args.get('longitude'))
-    url = 'https://dapi.kakao.com/v2/local/search/keyword.json'
-    base_path = os.path.dirname(__file__)
-    with open(os.path.join(base_path, '../config.json')) as json_file:
-        json_data = json.load(json_file)
-        key = json_data['REST_KEY']
-    KL = KakaoLocal(key)
     x, y = longitude, latitude
+    current=(y,x)
     placement_list = db.execute(
-        "SELECT placement_name "
-        "FROM test_placement; "
+        "SELECT * "
+        "FROM test_placement_loc; "
     ).fetchall()
-    placement_list = [ix['placement_name'] for ix in placement_list]
+    placement_list = [dict(ix) for ix in placement_list]
     results = []
     for i in placement_list:
-        tmp = KL.search_keyword(query=i, x=x, y=y, radius=15)
-        if tmp['meta']['pageable_count'] != 0:
-            results.append(i)
-    surround_result = []
-    for i in results:
-        tmp_list = db.execute(
-            "SELECT * "
-            "FROM test_contents "
-            "WHERE placement_name=:ct", {'ct': i},
-        ).fetchall()
-        surround_result += [dict(ix) for ix in tmp_list]
-    if 10 * page < len(surround_result):
-        return json.dumps(surround_result[10 * (page - 1):10 * (page)], ensure_ascii=False)
+        placement = (i['latitude'], i['longitude'])
+        results.append((i, haversine(placement, current, unit='km')))
+    results.sort(key=lambda x:x[1])
+    if 10 * page < len(results):
+        return json.dumps(results[10 * (page - 1):10 * (page)], ensure_ascii=False)
     else:
-        return json.dumps(surround_result[10 * (page):], ensure_ascii=False)
+        return json.dumps(results[10 * (page):], ensure_ascii=False)
 
 
 @bp.route('/get_district')

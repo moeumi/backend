@@ -144,7 +144,7 @@ def busan_event():
             cur.execute("INSERT OR IGNORE INTO test_contents (placement_name, center_name, contents_title, contents_id,category, detail_link,"
                         "apply_start_date, apply_end_date, operate_start_date, operate_end_date,"
                         "edu_target,apply_target,max_apply_num,applied_num,wait_num,apply_state) VALUES"
-                        "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (info_dict[j]['장소'],info_dict[j]['기관'], title_list[j], int(busan_event.loc[tmp_row]['순번']),category, detail_link,
+                        "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (info_dict[j]['장소'],info_dict[j]['기관'], title_list[j], int(busan_event.loc[tmp_row]['순번'])*100,category, detail_link,
                                                           date_dict[j]['신청'].split(" ~")[0], date_dict[j]['신청'].split(" ~")[1],
                                                           date_dict[j]['행사'].split(" ~")[0], date_dict[j]['행사'].split(" ~")[1],
                                                           info_dict[j]['대상'], 'none',

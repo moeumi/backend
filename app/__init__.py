@@ -44,6 +44,7 @@ def create_app(test_config=None):
         #center.center()
         #crawling.busan_lib_event()
         #crawling.busan_event()
+        #center.center_lat_log()
 
     app.add_url_rule("/", endpoint="index")
 
