@@ -40,6 +40,7 @@ def create_app(test_config=None):
     from app import crawling_update
 
     #with app.app_context():
+        #category.tf_auto_category()
         #category.category()
         #center.center()
         #crawling.busan_lib_event()

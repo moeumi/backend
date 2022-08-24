@@ -13,7 +13,6 @@ bp = Blueprint('main', __name__, url_prefix='/')
 
 @bp.route('/recommends', methods=["POST"])
 def recommends():
-    print(request.get_json())
     db = get_db()
     data = request.get_json()
     token = data["token"]
@@ -21,7 +20,6 @@ def recommends():
     sex = data["sex"]
     age = data["age"]
 
-    print(token, list(category), sex, age)
     db.execute(
         "INSERT INTO user (token, sex, age) "
         "values (?,?,?);", (token, sex, age),
@@ -51,7 +49,7 @@ def contents():  # all-contents
     ).fetchall()
     k = json.dumps([dict(ix) for ix in results], ensure_ascii=False)
 
-    return Response(json.dumps([dict(ix) for ix in results], ensure_ascii=False))
+    return json.dumps([dict(ix) for ix in results], ensure_ascii=False)
 
 
 @bp.route('/contents/district/<district_name>')
@@ -169,9 +167,6 @@ def surround():
 
 @bp.route('/get_district')
 def current_district():
-    """
-    If the current location is in latitude and longitude, return the district name
-    """
     base_path = os.path.dirname(__file__)
     latitude = float(request.args.get('latitude'))
     longitude = float(request.args.get('longitude'))
@@ -183,5 +178,4 @@ def current_district():
     url = f"https://dapi.kakao.com/v2/local/geo/coord2regioncode.json"
     response = requests.get(url, headers=header, params={"x":f"{longitude}", "y":f"{latitude}"})
     document = json.loads(response.text)
-    #return response.json()["documents"][0]['region_2depth_name']
     return document['documents'][0]['region_2depth_name']

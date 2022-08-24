@@ -33,16 +33,16 @@ def busan_lib_event():
         libraries = soup.select("ul.tabList>li>a")[1:]
         library_dict = {}
         for library in libraries:
-            tmp = str(library).split('data-id="')[1].split("\"")
-            library_dict[library.string] = tmp[0]
+            tmp_data = str(library).split('data-id="')[1].split("\"")
+            library_dict[library.string] = tmp_data[0]
 
         elements = list(soup.select("a.viewEduInfo"))
         element_list = []
         element_str_list = []
         for element in elements:
-            tmp = str(element).split('class="')[1].split("\"")
-            if tmp[0] == "viewEduInfo":
-                element_list.append(tmp[4])  # edu-se,data-id(edu-seq)
+            tmp_data = str(element).split('class="')[1].split("\"")
+            if tmp_data[0] == "viewEduInfo":
+                element_list.append(tmp_data[4])  # edu-se,data-id(edu-seq)
                 element_str_list.append(element.string)
 
 
@@ -53,8 +53,8 @@ def busan_lib_event():
             detail_link = ('https://home.pen.go.kr/yeyak/edu/lib/selectEduInfo.do?mi=14460&eduSeq='
             + element_list[tmp_row]+'&srchRsSysId='+library_dict[row[2]])
             category='none'
-            tmp = category_df.loc[category_df['강좌명'] == element_str_list[tmp_row]]
 
+            tmp = category_df.loc[category_df['강좌명'] == element_str_list[tmp_row]]
             if (tmp.empty == False):
                 category=tmp.iloc[0]['분류']
 
@@ -128,17 +128,16 @@ def busan_event():
                     info_dict.append({'기관':info_list[0], '대상':'', '장소':info_list[1],'문의':info_list[2]})
                 info_list = []
 
-
-
-
         cur = db.cursor()
 
         for j in range(10):
             tmp_row=j+(10*i)
             category = 'none'
+
             tmp = category_df.loc[category_df['강좌명'] ==title_list[j]]
             if (tmp.empty == False):
                 category = tmp.iloc[0]['분류']
+
             detail_link = ('https://reserve.busan.go.kr/lctre/view?resveGroupSn='
             + ids_list[j]['group']+'&progrmSn='+ids_list[j]['prg']+'&srchGugun=&srchResveInsttCd=&srchCtgry=&srchBeginDe=&srchEndDe=&srchVal=')
             cur.execute("INSERT OR IGNORE INTO test_contents (placement_name, center_name, contents_title, contents_id,category, detail_link,"
